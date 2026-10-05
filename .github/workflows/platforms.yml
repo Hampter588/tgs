@@ -1,0 +1,175 @@
+name: Test and compile all platforms
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tgs-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  # Public URL only. Secrets must never use the VITE_ prefix.
+  VITE_API_URL: ${{ vars.TGS_API_URL }}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          VITE_API_URL: ""
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tgs-web
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+  desktop:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            command: package:win
+            name: windows-x64-unsigned
+          - os: macos-latest
+            command: package:mac
+            name: macos-x64-arm64-unsigned
+          - os: ubuntu-latest
+            command: package:linux
+            name: linux-x64-appimage-deb
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build macOS architectures
+        if: runner.os == 'macOS'
+        run: npm run package:mac -- --publish never --x64 --arm64
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Build Windows or Linux
+        if: runner.os != 'macOS'
+        run: npm run ${{ matrix.command }} -- --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tgs-${{ matrix.name }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
+          if-no-files-found: error
+          retention-days: 30
+  android:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - run: chmod +x android/gradlew
+      - run: ./gradlew assembleDebug assembleRelease bundleRelease
+        working-directory: android
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tgs-android-debug-and-unsigned-release
+          path: |
+            android/app/build/outputs/apk/**/*.apk
+            android/app/build/outputs/bundle/**/*.aab
+          if-no-files-found: error
+          retention-days: 30
+  ios:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync ios
+      - name: Build simulator app
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios-build CODE_SIGNING_ALLOWED=NO build
+      - name: Archive unsigned device app
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath ios-build/TGS-unsigned.xcarchive CODE_SIGNING_ALLOWED=NO archive
+      - name: Package artifacts
+        run: |
+          ditto -c -k --keepParent ios-build/Build/Products/Release-iphonesimulator/App.app TGS-ios-simulator.zip
+          ditto -c -k --keepParent ios-build/TGS-unsigned.xcarchive TGS-ios-unsigned-archive.zip
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tgs-ios-simulator-and-unsigned-device-archive
+          path: TGS-ios-*.zip
+          if-no-files-found: error
+          retention-days: 30
+  nixos:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - uses: cachix/install-nix-action@v31
+      - run: npm ci
+      - run: npm run build
+      - name: Build NixOS package and export closure
+        run: |
+          node scripts/prepare-nix.mjs
+          nix build path:./work/nix-source# --print-build-logs
+          readlink -f result > nix-store-path.txt
+          nix copy --to "file://$PWD/nix-cache" "$(readlink -f result)"
+          cp work/nix-source/flake.lock ./flake.lock
+          tar -czf TGS-nixos-x86_64-cache.tar.gz nix-cache nix-store-path.txt flake.nix flake.lock
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tgs-nixos-x86_64-binary-cache
+          path: TGS-nixos-x86_64-cache.tar.gz
+          if-no-files-found: error
+          retention-days: 30
+  server:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker build -t tgs-server:${{ github.sha }} .
+      - run: docker save tgs-server:${{ github.sha }} | gzip > TGS-server-docker.tar.gz
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tgs-server-docker-image
+          path: TGS-server-docker.tar.gz
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+release/
+release-*/
+playwright-report/
+test-results/
+android/.gradle/
+android/local.properties
+ios/App/Pods/
+.env*
+!.env.example
+data/
+work/
+*.sqlite*
+preview-*.png

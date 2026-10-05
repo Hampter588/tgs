@@ -1,0 +1,33 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    init: true
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      DATABASE_PATH: /app/data/tgs.sqlite
+      TRUST_PROXY: 1
+    volumes:
+      - tgs-data:/app/data
+    expose: ["3001"]
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      TGS_DOMAIN: ${TGS_DOMAIN:?Set TGS_DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+volumes:
+  tgs-data:
+  caddy-data:
+  caddy-config:

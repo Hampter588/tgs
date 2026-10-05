@@ -1,0 +1,13 @@
+node_modules
+data
+work
+release*
+android
+ios
+.git
+.env
+.env.*
+test-results
+playwright-report
+*.zip
+*.png

@@ -1,0 +1,232 @@
+.auth-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: radial-gradient(ellipse at top, #31233f, #14121c 65%);
+}
+.auth-card {
+  width: 100%;
+  max-width: 470px;
+  background: #201a29;
+  border: 1px solid #4a3857;
+  border-radius: 18px;
+  padding: 34px;
+}
+.auth-card .brand {
+  margin: 0 0 32px;
+  padding: 0;
+}
+.auth-card h1 {
+  font-size: 31px;
+}
+.auth-card .notice {
+  margin-bottom: 18px;
+}
+.auth-card form {
+  margin-top: 24px;
+}
+.full {
+  width: 100%;
+}
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 24px;
+}
+.auth-links button {
+  font-size: 11px;
+  color: #c1a6dc;
+  padding: 0;
+}
+.auth-footer {
+  font-size: 9px;
+  line-height: 1.8;
+  color: #80738f;
+  margin: 28px 0 0;
+}
+.message-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  font-size: 12px;
+  padding: 14px 39px;
+  background: #382b46;
+  color: #e1ceed;
+  border-bottom: 1px solid #544163;
+}
+.message-bar button {
+  display: flex;
+}
+.verification {
+  margin: 16px 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.format-list select {
+  width: auto;
+  max-width: 145px;
+  padding: 6px;
+  font-size: 10px;
+  background: #241c2f;
+}
+.stack-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.danger-link {
+  font-size: 11px;
+  color: #e6a5ae;
+  padding: 9px 0;
+}
+.settings-section {
+  padding: 25px 0;
+}
+.settings-section h3 {
+  font-size: 14px;
+  margin-top: 22px;
+}
+.settings-section > button {
+  margin: 0 8px 8px 0;
+}
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid #43324e;
+  padding: 20px 0;
+  overflow-wrap: anywhere;
+}
+.admin-row > div {
+  min-width: 0;
+}
+.admin-row b {
+  font-size: 13px;
+}
+.admin-row small {
+  display: block;
+  color: #a891b7;
+  font-size: 10px;
+  margin: 10px 0;
+  line-height: 1.6;
+}
+.admin-row p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 10px 0;
+  color: #c7b7d3;
+  white-space: pre-wrap;
+}
+.admin-row button {
+  flex-shrink: 0;
+}
+.admin-search {
+  margin-top: 20px;
+}
+.decklist-view {
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #19131f;
+  padding: 15px;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow: auto;
+}
+.version {
+  border-bottom: 1px solid #4b3758;
+  padding: 16px 0;
+  font-size: 12px;
+}
+.version summary {
+  cursor: pointer;
+}
+.comment-control {
+  display: inline-block;
+  font-size: 9px;
+  color: #a88fb8;
+  padding: 8px 8px 0 0;
+}
+.notice.error {
+  border-color: #96606c;
+  color: #edbac3;
+}
+.profile-cover.green {
+  background: radial-gradient(ellipse at center, #426653, #1e352c);
+}
+.profile-cover.blue {
+  background: radial-gradient(ellipse at center, #3d5977, #1b2b3e);
+}
+.profile-cover.orange {
+  background: radial-gradient(ellipse at center, #805438, #37291e);
+}
+.sidebar .brand {
+  margin-bottom: 32px;
+}
+.sidebar .nav-item {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.sidebar .sidebar-divider {
+  margin: 20px 10px;
+}
+.theme-green {
+  --purple: #aad2b3;
+}
+.theme-orange {
+  --purple: #dfb093;
+}
+.theme-blue {
+  --purple: #a5c8e7;
+}
+.group-card .stack-buttons {
+  max-width: 180px;
+}
+.feed-tabs button {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .auth-shell {
+    padding: 18px;
+  }
+  .auth-card {
+    padding: 27px 23px;
+  }
+  .message-bar {
+    padding: 12px 18px;
+    font-size: 11px;
+  }
+  .admin-row {
+    gap: 12px;
+  }
+  .admin-row .secondary {
+    padding: 9px;
+    font-size: 10px;
+  }
+  .feed-tabs {
+    gap: 18px;
+  }
+  .verification {
+    margin: 12px 18px;
+  }
+  .group-card .stack-buttons {
+    max-width: none;
+  }
+  .admin-row small {
+    max-width: 240px;
+  }
+  .admin-row p {
+    max-width: 260px;
+  }
+}
